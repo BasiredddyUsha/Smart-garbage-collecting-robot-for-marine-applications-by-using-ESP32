@@ -1,0 +1,2 @@
+# Smart-garbage-collecting-robot-for-marine-applications-by-using-ESP32
+A smart garbage collecting robot for marine applications using ESP32 automates floating waste removal from water. It uses ultrasonic sensors for garbage detection, DC motors for navigation, and a servo-driven net for collection. Powered by ESP32, it ensures efficient cleaning and can be upgraded with IoT for remote monitoring and control.
