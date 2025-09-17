@@ -1,0 +1,95 @@
+// Smart Garbage Collecting Robot for Marine Applications using ESP32
+// Components: ESP32, Ultrasonic Sensor (HC-SR04), Servo, Motor Driver (L298N), DC Motors
+
+#include <Arduino.h>
+#include <Servo.h>
+
+// Ultrasonic pins
+#define TRIG 5
+#define ECHO 18
+
+// Motor driver pins
+#define ENA 23
+#define IN1 22
+#define IN2 21
+#define ENB 19
+#define IN3 4
+#define IN4 2
+
+// Servo pin
+#define SERVO_PIN 13
+
+Servo collectorServo;
+
+void setup() {
+  Serial.begin(115200);
+
+  // Ultrasonic setup
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
+
+  // Motor driver setup
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  // Attach servo
+  collectorServo.attach(SERVO_PIN);
+  collectorServo.write(90); // Neutral position
+}
+
+// Function to measure distance
+long getDistance() {
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+
+  long duration = pulseIn(ECHO, HIGH);
+  long distance = duration * 0.034 / 2; // in cm
+  return distance;
+}
+
+// Motor control functions
+void moveForward() {
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
+}
+
+void stopMotors() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}
+
+void loop() {
+  long distance = getDistance();
+  Serial.print("Distance: ");
+  Serial.println(distance);
+
+  if (distance > 20 || distance == 0) {
+    // Move forward when no garbage detected
+    moveForward();
+  } else {
+    // Garbage detected within 20cm
+    stopMotors();
+    Serial.println("Garbage Detected! Collecting...");
+
+    // Lower collector
+    collectorServo.write(0);
+    delay(2000);
+
+    // Raise collector
+    collectorServo.write(90);
+    delay(2000);
+  }
+}
